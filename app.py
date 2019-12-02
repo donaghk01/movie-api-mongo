@@ -44,6 +44,7 @@ def info(id):
     runtime = json_object['Runtime']
     plot = json_object['Plot']
     released = json_object['Released']
+    watched = 'false'
 
     ratings = json_object['Ratings']
 
@@ -52,7 +53,7 @@ def info(id):
         value = rating['Value']
 
     if request.method == 'POST':
-        fav = mongo.db.userMovies.insert({'_id': id, 'title': title, 'rated': rated, 'poster': poster})
+        fav = mongo.db.userMovies.insert({'_id': id, 'title': title, 'rated': rated, 'poster': poster, 'watched': watched})
         resp = 'Added to Favourites'
         return resp
 
@@ -63,8 +64,17 @@ def info(id):
 @app.route('/delete/<id>', methods=['POST'])
 def delete_movie(id):
     mongo.db.userMovies.delete_one({'_id': id})
-    resp = 'Movie removed successfully!'
-    return resp
+    return userfavs()
+
+@app.route('/watched/<id>', methods=['POST'])
+def watched_movie(id):
+    mongo.db.userMovies.update({'_id':id},{ '$set':{'watched': 'true'}})
+    return userFavs()
+
+@app.route('/unwatch/<id>', methods=['POST'])
+def unwatch_movie(id):
+    mongo.db.userMovies.update({'_id':id},{ '$set':{'watched': 'false'}})
+    return userFavs()
 
 @app.route('/userFavs')
 def userFavs():
